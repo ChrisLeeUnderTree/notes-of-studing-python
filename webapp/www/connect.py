@@ -10,7 +10,7 @@ import aiomysql
 logging.basicConfig(level=logging.INFO)
 
 
-async def create_pool(loop, **kw):
+async def create_pool(**kw):
     logging.info('creating database connection pool...')
     global __pool
     __pool = await aiomysql.create_pool(
@@ -23,12 +23,12 @@ async def create_pool(loop, **kw):
         autocommit=kw.get('autocommit', True),
         maxsize=kw.get('maxsize', 10),
         minsize=kw.get('minsize', 1),
-        loop=loop
+        loop=kw.get('loop', None),
     )
 
 
 async def select(sql, args, size=None):
-    logging.log(sql, args)
+    logging.info('sql: %s, args: %s' % (sql, args))
     global __pool
     with (await __pool) as conn:
         cur = await conn.cursor(aiomysql.DictCursor)
@@ -43,7 +43,7 @@ async def select(sql, args, size=None):
 
 
 async def execute(sql, args):
-    logging.log(sql)
+    logging.info('sql: %s, args: %s' % (sql, args))
     with (await __pool) as conn:
         try:
             cur = await conn.cursor()
@@ -51,5 +51,5 @@ async def execute(sql, args):
             affected = cur.rowcount
             await cur.close()
         except BaseException as e:
-            raise
+            raise e
         return affected
