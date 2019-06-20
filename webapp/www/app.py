@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # @Time : 2019-06-19 10:33
-# @Author : LI FU
+# @Author : Li Fu
+
 import logging
 
 import asyncio
