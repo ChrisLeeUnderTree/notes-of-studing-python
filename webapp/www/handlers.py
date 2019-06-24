@@ -5,7 +5,7 @@
 
 import time
 
-from model import Blog
+from model import Blog, User
 
 from req import get
 
@@ -25,3 +25,11 @@ async def index(request):
         '__template__': 'blogs.html',
         'blogs': blogs
     }
+
+
+@get('/api/users')
+async def api_get_users():
+    users = await User.find_all(order_by='created_at desc')
+    for u in users:
+        u.passwd = '******'
+    return dict(users=users)
