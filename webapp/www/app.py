@@ -3,9 +3,9 @@
 # @Time : 2019-06-19 10:33
 # @Author : Li Fu
 
-import logging
-
 import asyncio
+
+import logging
 
 import os
 
@@ -13,31 +13,17 @@ from aiohttp import web
 
 from jinja2 import Environment, FileSystemLoader
 
+from conf.app_config import LocalConfig
+
+from connect import create_pool
+
 from jinjia_conf import datetime_filter
 
 from middleware import logger_factory, response_factory
+
 from req import add_routes, add_static
 
 logging.basicConfig(level=logging.INFO)
-
-
-def index(request):
-    return web.Response(body=b'<h1>Awesome</h1>', content_type="text/html")
-
-
-def init_routes_map(web_app):
-    web_app.router.add_route('GET', '/', index)
-
-
-async def start_srv(web_app):
-    runner = web.AppRunner(web_app)
-    await runner.setup()
-    site = web.TCPSite(runner, '127.0.0.1', 9000)
-    await site.start()
-    logging.info('server started at http://127.0.0.1:9000')
-    init_jinja2(web_app, filters=dict(datetime=datetime_filter))
-    add_routes(web_app, 'handlers')
-    add_static(web_app)
 
 
 def init_jinja2(_, **kw):
@@ -60,6 +46,18 @@ def init_jinja2(_, **kw):
         for name, f in filters.items():
             env.filters[name] = f
     app['__templating__'] = env
+
+
+async def start_srv(web_app):
+    init_jinja2(web_app, filters=dict(datetime=datetime_filter))
+    add_routes(web_app, 'handlers')
+    add_static(web_app)
+    runner = web.AppRunner(web_app)
+    await runner.setup()
+    site = web.TCPSite(runner, '127.0.0.1', 9000)
+    await create_pool(user=LocalConfig.db_user, password=LocalConfig.db_password, db=LocalConfig.db_name)
+    await site.start()
+    logging.info('server started at http://127.0.0.1:9000')
 
 
 if __name__ == '__main__':
