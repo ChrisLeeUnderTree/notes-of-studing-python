@@ -124,3 +124,24 @@ async def api_register_user(*, email, name, passwd):
     r.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
     return r
 
+
+@post('/api/blogs')
+async def api_create_blog(request, *, name, summary, content):
+    if request.__user__ is None or not request.__user__.admin:
+        raise APIPermissionError()
+    if not name or not name.strip():
+        raise APIValueError('name', 'name cannot be empty.')
+    if not summary or not summary.strip():
+        raise APIValueError('summary', 'summary cannot be empty.')
+    if not content or not content.strip():
+        raise APIValueError('content', 'content cannot be empty.')
+    blog = Blog(
+        user_id=request.__user__.id,
+        user_name=request.__user__.name,
+        user_image=request.__user__.image,
+        name=name.strip(),
+        summary=summary.strip(),
+        content=content.strip()
+    )
+    await blog.save()
+    return blog
