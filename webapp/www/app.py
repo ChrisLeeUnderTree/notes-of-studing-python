@@ -19,7 +19,7 @@ from connect import create_pool
 
 from jinjia_conf import datetime_filter
 
-from middleware import logger_factory, response_factory
+from middleware import logger_factory, response_factory, auth_factory
 
 from req import add_routes, add_static
 
@@ -64,6 +64,7 @@ if __name__ == '__main__':
     app = web.Application(middlewares=[
         logger_factory,
         response_factory,
+        auth_factory,
     ])
     loop = asyncio.get_event_loop()
     loop.run_until_complete(start_srv(app))

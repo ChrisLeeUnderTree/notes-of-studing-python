@@ -11,3 +11,4 @@ class LocalConfig:
     db_password = 'lifu19670618=WEN'
     db_name = 'awesome'
     session = 'AwEsOmE'
+    COOKIE_NAME = 'awesome_session'

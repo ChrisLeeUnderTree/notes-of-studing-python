@@ -9,6 +9,10 @@ import logging
 
 from aiohttp import web
 
+from conf.app_config import LocalConfig
+
+from utils import cookie2user
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -61,3 +65,17 @@ async def response_factory(app, handler):
         return resp
 
     return response
+
+
+async def auth_factory(_, handler):
+    async def auth(request):
+        logging.info('check user: %s %s' % (request.method, request.path))
+        request.__user__ = None
+        cookie_str = request.cookies.get(LocalConfig.COOKIE_NAME)
+        if cookie_str:
+            user = await cookie2user(cookie_str)
+            if user:
+                logging.info('set current user: %s' % user.email)
+                request.__user__ = user
+        return await handler(request)
+    return auth
