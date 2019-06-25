@@ -78,4 +78,5 @@ async def auth_factory(_, handler):
                 logging.info('set current user: %s' % user.email)
                 request.__user__ = user
         return await handler(request)
+
     return auth
