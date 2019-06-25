@@ -15,7 +15,7 @@ import time
 
 from aiohttp import web
 
-from apis import APIValueError, APIError, APIPermissionError
+from apis import APIValueError, APIError, APIPermissionError, Page
 
 from conf.app_config import LocalConfig
 
@@ -23,7 +23,7 @@ from model import Blog, User, next_id
 
 from req import get, post
 
-from utils import user2cookie
+from utils import user2cookie, get_page_index
 
 logging.basicConfig(level=logging.INFO)
 
@@ -145,3 +145,22 @@ async def api_create_blog(request, *, name, summary, content):
     )
     await blog.save()
     return blog
+
+
+@get('/api/blogs')
+async def api_blogs(*, page='1'):
+    page_index = get_page_index(page)
+    num = await Blog.find_number('count(id)')
+    p = Page(num, page_index)
+    if num == 0:
+        return dict(page=p, blogs=())
+    blogs = await Blog.find_all(orderBy='created_at desc', limit=(p.offset, p.limit))
+    return dict(page=p, blogs=blogs)
+
+
+@get('/manage/blogs')
+def manage_blogs(*, page='1'):
+    return {
+        '__template__': 'manage_blogs.html',
+        'page_index': get_page_index(page)
+    }

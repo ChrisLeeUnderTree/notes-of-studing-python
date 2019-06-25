@@ -50,3 +50,14 @@ async def cookie2user(cookie_str):
     except Exception as e:
         logging.exception(e)
         return None
+
+
+def get_page_index(page_str):
+    _page = 1
+    try:
+        _page = int(page_str)
+    except ValueError as e:
+        raise e
+    if _page < 1:
+        _page = 1
+    return _page
